@@ -9,7 +9,7 @@
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
 
-const char ssid[] = "internet";  //  your network SSID (name)
+const char ssid[] = "Martin Router King";  //  your network SSID (name)
 const char pass[] = "password";       // your network password
 
 // NTP Servers:
@@ -78,7 +78,7 @@ void loop()
   tm.Minute = 0;
   tm.Day = Day;
   tm.Month = Month;
-  tm.Year = Year-1970;
+  tm.Year = Year - 1970;
 
   nextMakeTime = makeTime(tm);
 
@@ -92,14 +92,22 @@ void loop()
 
       digitalClockDisplay();
 
+
+      Serial.println(" ");
+      Serial.println("neztMakeTime: D,M,Y ");
       Serial.println(nextMakeTime);
       Serial.println(day(nextMakeTime));
       Serial.println(month(nextMakeTime));
       Serial.println(year(nextMakeTime));
-      
+
+      Serial.println(" ");
       Serial.print("PrevDisplay");
       Serial.println(prevDisplay);
+      Serial.println(day(prevDisplay));
+      Serial.println(month(prevDisplay));
+      Serial.println(year(prevDisplay));
 
+      Serial.println(" ");
       Serial.print("nextMakeTime");
       Serial.println(nextMakeTime);
     }

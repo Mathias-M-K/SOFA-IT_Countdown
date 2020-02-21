@@ -1,7 +1,6 @@
 #define FASTLED_ESP8266_NODEMCU_PIN_ORDER
 
 #include <FastLED.h>
-#include <TimeLib.h>
 
 #define LED_PIN  3
 #define COLOR_ORDER GRB

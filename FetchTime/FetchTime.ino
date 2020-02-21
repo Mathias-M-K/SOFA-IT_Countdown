@@ -1,116 +1,163 @@
 #include <NTPClient.h>
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
+#include <TimeLib.h>
 
-const char *ssid     = "internet";
+//Wifi information
+const char *ssid     = "Martin Router King";
 const char *password = "password";
 
 const long utcOffsetInSeconds = 3600;
-
-char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
 // Define NTP Client to get time
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
 
-float startTime = 0;
+//Creating list with the dates on which the fridge will be emptied
+time_t dates[30];
+int nrOfDates = 0;
 
+//byte Day = 6;
+//byte Month = 3;
+//int Year = 2020;
 
-/*
-    WL_NO_SHIELD        = 255,   // for compatibility with WiFi Shield library
-    WL_IDLE_STATUS      = 0,
-    WL_NO_SSID_AVAIL    = 1,
-    WL_SCAN_COMPLETED   = 2,
-    WL_CONNECTED        = 3,
-    WL_CONNECT_FAILED   = 4,
-    WL_CONNECTION_LOST  = 5,
-    WL_DISCONNECTED     = 6
-*/
+//tmElements_t tm;
 
 void setup() {
+  addDate(20, 2, 2020, 14, 52, 00);
+  addDate(20, 2, 2020, 17, 52, 00);
+  addDate(29, 4, 2020, 14, 52, 00);
+  addDate(30, 11, 2020, 14, 52, 00);
+  addDate(21, 2, 2020, 14, 52, 00);
+  addDate(6, 3, 2020, 14, 52, 00);
+  addDate(20, 3, 2020, 14, 52, 00);
+  addDate(3, 4, 2020, 14, 52, 00);
+  addDate(17, 4, 2020, 14, 52, 00);
+  addDate(1, 5, 2020, 14, 52, 00);
+
   Serial.begin(115200);
   Serial.println("");
   Serial.println("");
 
-  pinMode(LED_BUILTIN, OUTPUT);
-
   WiFi.begin(ssid, password);
-
-  Serial.println("");
-  Serial.print("WiFi Status: ");
-  Serial.println(WiFi.status());
+  Serial.print("Connecting to "); Serial.println(ssid);
+  Serial.print("WiFi Status: "); Serial.println(wl_status_to_string(WiFi.status()));
 
   Serial.print("Searching...");
 
   while ( WiFi.status() != WL_CONNECTED ) {
-
-    screamForWifi();
+    delay ( 500 );
+    Serial.print ( "." );
   }
 
-  Serial.println("");
-  Serial.print("WiFi Status: ");
-  Serial.println(WiFi.status());
-
   Serial.println();
-  Serial.print("MAC: ");
-  Serial.println(WiFi.macAddress());
-  Serial.print("IP: ");
-  Serial.println(WiFi.localIP());
+  Serial.print("WiFi Status: "); Serial.println(wl_status_to_string(WiFi.status()));
+  Serial.print("MAC: "); Serial.println(WiFi.macAddress());
+  Serial.print("IP: "); Serial.println(WiFi.localIP());
+  Serial.println();
 
-  Serial.println("");
-  Serial.println("");
-  
   timeClient.begin();
 }
 
 void loop() {
   timeClient.update();
-  Serial.print(daysOfTheWeek[timeClient.getDay()]);
-  Serial.print(", ");
-  Serial.print(timeClient.getHours());
-  Serial.print(":");
-  Serial.print(timeClient.getMinutes());
-  Serial.print(":");
-  Serial.println(timeClient.getSeconds());
-  //Serial.println(timeClient.getFormattedTime());
+
+  Serial.print("Time Now : ");
+  printDate(timeClient.getEpochTime());
+  Serial.print("Time Next: ");
+  printDate(getEarliestDate());
+
+  delay(5000);
+  //time_t nextMakeTime;
+
+
+  //tm.Second = in;
+  //tm.Hour = in;
+  //tm.Minute = in;
+  //tm.Day = Day;
+  //tm.Month = Month;
+  //tm.Year = Year - 1970;
+
+  //nextMakeTime = makeTime(tm);
+
+  //float secondsToNextEmpty = nextMakeTime - timeClient.getEpochTime();
+
+  //Serial.print("Days til next fridge purge: ");
+  //Serial.println(round(secondsToNextEmpty / 60 / 60 / 24));
+
+  return;
 
   if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("");
-    Serial.println("Searching");
-    startTime = millis();
+    Serial.print("Wifi Status: ");
+    Serial.println(wl_status_to_string(WiFi.status()));
+    Serial.print("Connecting to ");
+    Serial.println(ssid);
 
     while (WiFi.status() != WL_CONNECTED) {
-      screamForWifi();
-      Serial.print("Wifi Status: ");
-      Serial.println(WiFi.status());
+      delay(500);
+      Serial.print(".");
     }
   }
 
-  Blink();
-  delay(10000);
+  delay(500);
 }
+time_t getEarliestDate() {
 
-void screamForWifi() {
-  
+  time_t earliestDate = 301195;
 
-  if (millis() - startTime > 1000) {
-    startTime = millis();
-    Serial.print(".");
+  for (int i = 0; i <= nrOfDates; i++) {
+    float timeNow = timeClient.getEpochTime();
+    float date = dates[i];
+    
+    if (date - timeNow < 0) {
+      continue;
+    }
+    if (earliestDate == 301195) {
+      earliestDate = date;
+      continue;
+    }
+    if (date - timeNow < earliestDate - timeNow) {
+      earliestDate = date;
+    } else {
+    }
   }
-
-
-  Led(true);
-  delay(100);
-  Led(false);
-  delay(100);
+  return earliestDate;
 }
 
-void Blink() {
-  Led(true);
-  delay(50);
-  Led(false);
+void addDate(byte _day, byte _month, int _year, int _hour, int _minute, int _second) {
+  tmElements_t tm;
+  tm.Second = _second;
+  tm.Hour = _hour;
+  tm.Minute = _minute;
+  tm.Day = _day;
+  tm.Month = _month;
+  tm.Year = _year - 1970;
+
+  time_t t = makeTime(tm);
+
+  dates[nrOfDates] = t;
+
+  nrOfDates++;
 }
 
-void Led(bool onOff) {
-  digitalWrite(LED_BUILTIN, !onOff);
+void printDate(time_t _time) {
+  Serial.print("Date: "); Serial.print(day(_time));
+  Serial.print("/"); Serial.print(month(_time));
+  Serial.print("-"); Serial.print(year(_time));
+  Serial.print(" "); Serial.print(hour(_time));
+  Serial.print(":"); Serial.print(minute(_time));
+  Serial.print(":"); Serial.println(second(_time));
+}
+
+const char* wl_status_to_string(wl_status_t status) {
+  switch (status) {
+    case WL_NO_SHIELD: return "WL_NO_SHIELD";
+    case WL_IDLE_STATUS: return "WL_IDLE_STATUS";
+    case WL_NO_SSID_AVAIL: return "WL_NO_SSID_AVAIL";
+    case WL_SCAN_COMPLETED: return "WL_SCAN_COMPLETED";
+    case WL_CONNECTED: return "WL_CONNECTED";
+    case WL_CONNECT_FAILED: return "WL_CONNECT_FAILED";
+    case WL_CONNECTION_LOST: return "WL_CONNECTION_LOST";
+    case WL_DISCONNECTED: return "WL_DISCONNECTED";
+  }
 }
