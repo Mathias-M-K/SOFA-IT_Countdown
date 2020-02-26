@@ -24,6 +24,9 @@ int nrOfDates = 0;
 //tmElements_t tm;
 
 void setup() {
+  addDate(26, 2, 2020, 01, 30, 00);
+  addDate(26, 2, 2020, 15, 30, 00);
+  addDate(27, 2, 2020, 15, 30, 00);
   addDate(20, 2, 2020, 14, 52, 00);
   addDate(20, 2, 2020, 17, 52, 00);
   addDate(29, 4, 2020, 14, 52, 00);
@@ -64,8 +67,23 @@ void loop() {
 
   Serial.print("Time Now : ");
   printDate(timeClient.getEpochTime());
+  Serial.println("");
+
   Serial.print("Time Next: ");
   printDate(getEarliestDate());
+  Serial.println("");
+
+  Serial.print("Time to 0: ");
+  Serial.println(howLongTilDate(dates[0]));
+
+  Serial.print("Time to 1: ");
+  Serial.println(howLongTilDate(dates[1]));
+
+  Serial.print("Time to 2: ");
+  Serial.println(howLongTilDate(dates[2]));
+
+
+
 
   delay(5000);
   //time_t nextMakeTime;
@@ -101,6 +119,50 @@ void loop() {
 
   delay(500);
 }
+
+//in seconds
+String howLongTilDate(time_t date) {
+  String text;
+  float numberToPrint;
+  float secondsToTime = getTimeToDate(date);
+
+  
+
+  text = "";
+  numberToPrint = secondsToTime;
+  Serial.print("numberToPrint1: ");Serial.println(numberToPrint);
+
+  if ((secondsToTime / 60) > 1) {
+    text = " minutes left";
+    numberToPrint = round((secondsToTime / 60) - 0.5);
+
+    if ((secondsToTime / 60 / 60) > 1) {
+      text = " hours left";
+      numberToPrint = round((secondsToTime / 60 / 60) - 0.5);
+
+      if ((secondsToTime / 60 / 60 / 24) > 1) {
+        text = " Days left";
+        numberToPrint = round((secondsToTime / 60 / 60 / 24) + 0.5);
+      }
+    }
+  }else{
+    Serial.print("numberToPrint2: ");Serial.println(numberToPrint);
+    return (String)numberToPrint;
+  }
+  Serial.print("numberToPrint3: ");Serial.println(numberToPrint);
+  int i = (int) numberToPrint;
+
+  String number = (String)i;
+  return number + text;
+}
+
+float getTimeToDate(time_t date) {
+  float nextDate = date;
+  float timeNow = timeClient.getEpochTime();
+
+  return nextDate - timeNow;
+}
+
 time_t getEarliestDate() {
 
   time_t earliestDate = 301195;
@@ -108,7 +170,7 @@ time_t getEarliestDate() {
   for (int i = 0; i <= nrOfDates; i++) {
     float timeNow = timeClient.getEpochTime();
     float date = dates[i];
-    
+
     if (date - timeNow < 0) {
       continue;
     }
@@ -146,7 +208,7 @@ void printDate(time_t _time) {
   Serial.print("-"); Serial.print(year(_time));
   Serial.print(" "); Serial.print(hour(_time));
   Serial.print(":"); Serial.print(minute(_time));
-  Serial.print(":"); Serial.println(second(_time));
+  Serial.print(":"); Serial.print(second(_time));
 }
 
 const char* wl_status_to_string(wl_status_t status) {
