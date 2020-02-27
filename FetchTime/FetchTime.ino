@@ -4,7 +4,7 @@
 #include <TimeLib.h>
 
 //Wifi information
-const char *ssid     = "Martin Router King";
+const char *ssid     = "internet";
 const char *password = "password";
 
 const long utcOffsetInSeconds = 3600;
@@ -24,6 +24,7 @@ int nrOfDates = 0;
 //tmElements_t tm;
 
 void setup() {
+  addDate(27, 2, 2020, 13, 10, 00);
   addDate(26, 2, 2020, 01, 30, 00);
   addDate(26, 2, 2020, 15, 30, 00);
   addDate(27, 2, 2020, 15, 30, 00);
@@ -65,16 +66,15 @@ void setup() {
 void loop() {
   timeClient.update();
 
-  Serial.print("Time Now : ");
   printDate(timeClient.getEpochTime());
-  Serial.println("");
 
-  Serial.print("Time Next: ");
-  printDate(getEarliestDate());
-  Serial.println("");
+  delay(5000);
 
   Serial.print("Time to 0: ");
   Serial.println(howLongTilDate(dates[0]));
+
+  return;
+
 
   Serial.print("Time to 1: ");
   Serial.println(howLongTilDate(dates[1]));
@@ -123,14 +123,14 @@ void loop() {
 //in seconds
 String howLongTilDate(time_t date) {
   String text;
-  float numberToPrint;
-  float secondsToTime = getTimeToDate(date);
+  double numberToPrint;
+  double secondsToTime = getTimeToDate(date);
 
-  
+
 
   text = "";
   numberToPrint = secondsToTime;
-  Serial.print("numberToPrint1: ");Serial.println(numberToPrint);
+  Serial.print("numberToPrint1: "); Serial.println(numberToPrint);
 
   if ((secondsToTime / 60) > 1) {
     text = " minutes left";
@@ -145,20 +145,28 @@ String howLongTilDate(time_t date) {
         numberToPrint = round((secondsToTime / 60 / 60 / 24) + 0.5);
       }
     }
-  }else{
-    Serial.print("numberToPrint2: ");Serial.println(numberToPrint);
+  } else {
+    Serial.print("numberToPrint2: "); Serial.println(numberToPrint);
     return (String)numberToPrint;
   }
-  Serial.print("numberToPrint3: ");Serial.println(numberToPrint);
+  Serial.print("numberToPrint3: "); Serial.println(numberToPrint);
   int i = (int) numberToPrint;
 
   String number = (String)i;
   return number + text;
 }
 
-float getTimeToDate(time_t date) {
-  float nextDate = date;
-  float timeNow = timeClient.getEpochTime();
+double getTimeToDate(time_t date) {
+  time_t timeATM = timeClient.getEpochTime();
+
+  double nextDate = date;
+  double timeNow = timeATM;
+
+  Serial.println("Get Time To Date/////");
+  Serial.print("initial input: "); Serial.println(date);
+  Serial.print("float conversion: "); Serial.println(nextDate);
+  Serial.print("initial timeNow: "); Serial.println(timeATM);
+  Serial.print("float conversion: "); Serial.println(timeNow);
 
   return nextDate - timeNow;
 }
@@ -208,7 +216,7 @@ void printDate(time_t _time) {
   Serial.print("-"); Serial.print(year(_time));
   Serial.print(" "); Serial.print(hour(_time));
   Serial.print(":"); Serial.print(minute(_time));
-  Serial.print(":"); Serial.print(second(_time));
+  Serial.print(":"); Serial.println(second(_time));
 }
 
 const char* wl_status_to_string(wl_status_t status) {
