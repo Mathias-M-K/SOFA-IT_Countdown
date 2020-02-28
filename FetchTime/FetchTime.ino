@@ -4,7 +4,7 @@
 #include <TimeLib.h>
 
 //Wifi information
-const char *ssid     = "internet";
+const char *ssid     = "Martin Router King";
 const char *password = "password";
 
 const long utcOffsetInSeconds = 3600;
@@ -17,19 +17,9 @@ NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
 time_t dates[30];
 int nrOfDates = 0;
 
-//byte Day = 6;
-//byte Month = 3;
-//int Year = 2020;
-
-//tmElements_t tm;
-
 void setup() {
-  addDate(27, 2, 2020, 13, 10, 00);
-  addDate(26, 2, 2020, 01, 30, 00);
-  addDate(26, 2, 2020, 15, 30, 00);
-  addDate(27, 2, 2020, 15, 30, 00);
-  addDate(20, 2, 2020, 14, 52, 00);
-  addDate(20, 2, 2020, 17, 52, 00);
+  addDate(28, 2, 2020, 00, 50, 00);
+  addDate(28, 2, 2020, 10, 00, 00);
   addDate(29, 4, 2020, 14, 52, 00);
   addDate(30, 11, 2020, 14, 52, 00);
   addDate(21, 2, 2020, 14, 52, 00);
@@ -68,13 +58,8 @@ void loop() {
 
   printDate(timeClient.getEpochTime());
 
-  delay(5000);
-
   Serial.print("Time to 0: ");
   Serial.println(howLongTilDate(dates[0]));
-
-  return;
-
 
   Serial.print("Time to 1: ");
   Serial.println(howLongTilDate(dates[1]));
@@ -82,26 +67,8 @@ void loop() {
   Serial.print("Time to 2: ");
   Serial.println(howLongTilDate(dates[2]));
 
-
-
-
-  delay(5000);
-  //time_t nextMakeTime;
-
-
-  //tm.Second = in;
-  //tm.Hour = in;
-  //tm.Minute = in;
-  //tm.Day = Day;
-  //tm.Month = Month;
-  //tm.Year = Year - 1970;
-
-  //nextMakeTime = makeTime(tm);
-
-  //float secondsToNextEmpty = nextMakeTime - timeClient.getEpochTime();
-
-  //Serial.print("Days til next fridge purge: ");
-  //Serial.println(round(secondsToNextEmpty / 60 / 60 / 24));
+  delay(500);
+  
 
   return;
 
@@ -126,30 +93,34 @@ String howLongTilDate(time_t date) {
   double numberToPrint;
   double secondsToTime = getTimeToDate(date);
 
-
-
-  text = "";
   numberToPrint = secondsToTime;
-  Serial.print("numberToPrint1: "); Serial.println(numberToPrint);
 
   if ((secondsToTime / 60) > 1) {
     text = " minutes left";
     numberToPrint = round((secondsToTime / 60) - 0.5);
+    if (numberToPrint < 2) {
+      text = " minute left";
+    }
 
     if ((secondsToTime / 60 / 60) > 1) {
       text = " hours left";
       numberToPrint = round((secondsToTime / 60 / 60) - 0.5);
+      if (numberToPrint < 2) {
+        text = "hour left";
+      }
 
       if ((secondsToTime / 60 / 60 / 24) > 1) {
         text = " Days left";
         numberToPrint = round((secondsToTime / 60 / 60 / 24) + 0.5);
+        if (numberToPrint < 2) {
+          text = "Day left";
+        }
       }
     }
   } else {
-    Serial.print("numberToPrint2: "); Serial.println(numberToPrint);
-    return (String)numberToPrint;
+    int i = (int) numberToPrint;
+    return (String)i;
   }
-  Serial.print("numberToPrint3: "); Serial.println(numberToPrint);
   int i = (int) numberToPrint;
 
   String number = (String)i;
@@ -162,16 +133,10 @@ double getTimeToDate(time_t date) {
   double nextDate = date;
   double timeNow = timeATM;
 
-  Serial.println("Get Time To Date/////");
-  Serial.print("initial input: "); Serial.println(date);
-  Serial.print("float conversion: "); Serial.println(nextDate);
-  Serial.print("initial timeNow: "); Serial.println(timeATM);
-  Serial.print("float conversion: "); Serial.println(timeNow);
-
   return nextDate - timeNow;
 }
 
-time_t getEarliestDate() {
+time_t getEarliestDate(){
 
   time_t earliestDate = 301195;
 
